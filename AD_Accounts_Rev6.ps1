@@ -126,6 +126,7 @@ $mailto = "techcoord@ChangeMesd.com" # Email address to send the report
 $mailsubject = "Student Accounts" # Timestamp will be added to the end.
 
 #Email Notification
+$bldnotification = $false
 $hsbldcontact = "nope@nope"
 $msbldcontact = "nope@nope"
 $elembldcontact = "nope@nope"
@@ -302,6 +303,7 @@ New-Aduser `
 -Path "ou=$gradyr,$stubuildingou,$stuou"`
 -Department 'student'
 
+If (($bldnotification) -eq $true){
 #Email Building Staff New account information
   $body ="
     <p> A new account has been created for
@@ -315,9 +317,10 @@ Send-MailMessage -SmtpServer $smtpserver -From $mailfrom -To $hsbldcontact -Subj
 Send-MailMessage -SmtpServer $smtpserver -From $mailfrom -To $msbldcontact -Subject 'New student Account' -Body $body -BodyAsHtml 
 } elseif ($building -eq $elembuild1){ #Edit this to match your building number for elementary
 Send-MailMessage -SmtpServer $smtpserver -From $mailfrom -To $elembldcontact -Subject 'New student Account' -Body $body -BodyAsHtml 
-
+}
 start-sleep -Milliseconds 15
 continue
+}
 }
 
 
