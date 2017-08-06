@@ -96,7 +96,7 @@ $stuhomedirs1building = @("8","9,","11")
 
 #Default New user password
 #$fname.substring(0,1) + $lname.substring(0,1).ToLower() + $id.substring($id.length - 4, 4) # to create a password with firstintial, lastname then last 4 of school ID, If using the formula the password variable needs to be in the for each loop
-$password = "Bulldogs1"
+$password = "GenericPW1"
 
 #Generic Secufrity groups to add each student to based off the students assigned building
 $elemgroup = "elemstudents" #generic security group for elementary
@@ -110,8 +110,6 @@ $newgroupspath = "OU=SSG,OU=Security Groups for GPO,DC=ChangeMe,DC=local" #OU fo
 #Other variables#
 $disableday = "Sunday" #Day the script will check and disable students not found in the latest cognos report
 $logfiledir = "C:\scripts\active_directory\Logs\" #Location to save the logfile created by the script
-#Properties to Compare variable#
-$propertiestocompare = 'EmployeeID,GivenName,Surname,EmailAddress'
 
 #CSV import# Locations for CSV's used by the script
 $csvcurrent = 'C:\scripts\Active_Directory\CurrentStu.csv' #Current students in AD
