@@ -14,7 +14,6 @@ The primary job of the script is AD account creation and management:
 7) Added the email notification to specified people in each building, each account that is created generates an individual email with the students Name, Student ID, email address and password,
 8) Creates the home dir and sets the ACLs, the created directory inherits from the parent directory and then gives FullControl access to the student account.
 
-# Date: 3/23/15
 # Rev1 7/14/15 
  Added the Remove specials to reduce errors and complications with special characters in names and other services
 # Rev2 8/16/15 
