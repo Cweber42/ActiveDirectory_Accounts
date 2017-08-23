@@ -1,4 +1,4 @@
-he primary job of the script is AD account creation and management:
+The primary job of the script is AD account creation and management:
 1) Create Security groups by grad year
 2) Create OU's and Nest them under building # (as a common name like MS/HS etc)
 3) Create the user accounts
