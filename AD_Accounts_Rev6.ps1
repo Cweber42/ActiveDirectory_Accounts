@@ -3,7 +3,8 @@
 # The author offers customization and implementation services.
 # Rev6 7/21/17
 # Implemented Switch command to allow nesting of Gradyrs under building OU's, Created the Rename function, new users will error out and can be ignored. Email Notification to building staff of new accounts.
-
+#Rev 6.1 10/29/19
+# Updated to use latest cognosfile, changed switch to use building variables, moved filter higher in the file to avoid some errors
 #################
 # Special THanks#
 #################
