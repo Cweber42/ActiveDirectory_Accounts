@@ -61,7 +61,8 @@ $stuou = "ou=students, dc=ChangeMe,dc=local"
 $stuemail = "ChangeMesd.com"
 #Switch for Stubuildings Check in the creation ForEach Loop
 
-#Building numbers from Eschool
+#Building numbers from Eschool If you use more than the three default you will need to configure the switch commands around
+# line 201 and 280
 $elembuild1 = "8"
 #$elembuild2
 #$elembuild3
@@ -137,17 +138,7 @@ function RemoveSpecials ([String]$in)
 #Start transcript and download Cognos Report#
 $logfile = "$logfiledir\$(get-date -f yyy-MM-dd-HH-mm-ss).log"
 Try {Start-Transcript ($logfile)} catch {Stop-Transcript; Start-Transcript ($logfile)}
-do{
-    & $cognosDL $cognosreport $cognosdir
-    if ($lastexitcode -ne 0){
-    Write-host "Failed to download Cognos Report"
-        $numtries++
-            if($numtries -gt 3) {exit}
-        Start-Sleep -Seconds 5
-        } else {
-            $success = $true
-            }
-} while (!$success);
+& $cognosDL $cognosreport $cognosdir -reportstudio
 
 #load AD module#
 If (Get-Module -ListAvailable | Where-Object{$_.Name -eq "ActiveDirectory"}){
@@ -163,9 +154,12 @@ exit
 	Get-ADUser -Filter * -Properties division -SearchBase $stuou | Set-ADUser -Enabled:$false
 }
 
+#Filter Students from CSV report: Hard-coded in Rev5#
+Import-Csv $csvreport | Where {$_.'grade' -ne 'PK'} | Export-Csv $csvfiltered
+
 #Rename and Move Users to Correct OU from Cognos Report File
 try {
-$students = Import-Csv "$csvreport"  #Replace with $csvfiltered if using filter
+$students = Import-Csv "$csvfiltered"  #Replace with $csvfiltered if using filter
 } catch {
  Write-Host We have a problem with the CSV Report.
  exit
@@ -184,9 +178,9 @@ $principalname = $fname+"."+$lname+ $gradyr.substring(2) + "@" + $stuemail
 $homedir = $stuhomedir1 + "\" + $gradyr+ "\"+ $username
 $building = $student."Current Building" #Edit this to match your CSV If your header is not exactly Current Building
 Switch ($Student."Current Building"){
-    "8" {$stubuildingou ='ou=elementary'}
-    "9" {$stubuildingou ='ou=Highschool'}
-    "11" {$stubuildingou ='ou=MiddleSchool'}
+    "$elembuild1" {$stubuildingou ='ou=elementary'}
+    "$hsbuild1" {$stubuildingou ='ou=Highschool'}
+    "$msbuild1" {$stubuildingou ='ou=MiddleSchool'}
     }
 
 Get-ADUser -Filter {(EmployeeID -eq $id) -and (UserPrincipalName -ne $principalName)} `
@@ -195,10 +189,6 @@ Get-ADUser -Filter {(EmployeeID -eq $id) -and (UserPrincipalName -ne $principalN
 Get-ADUser -Identity $username | Move-ADObject -TargetPath "ou=$gradyr,$stubuildingou,$stuou"
 }
 }
-
-
-#Filter Students from CSV report: Hard-coded in Rev5#
-Import-Csv $csvreport | Where {$_.'grade' -ne 'PK'} | Export-Csv $csvfiltered
 
 #Compare new students to Current Students#
 Get-ADUser -SearchBase $stuou -Filter * -Properties EmployeeID,GivenName,Surname,EmailAddress| Select EmployeeID,GivenName,Surname,EmailAddress | Export-Csv $csvcurrent
@@ -267,9 +257,9 @@ $homedir = $stuhomedir1 + "\" + $gradyr+ "\"+ $username
 $building = $student."Current Building" #Edit this to match your CSV If your header is not exactly Current Building
 
 Switch ($Student."Current Building"){
-    "8" {$stubuildingou ='ou=elementary'}
-    "9" {$stubuildingou ='ou=Highschool'}
-    "11" {$stubuildingou ='ou=MiddleSchool'}
+    "$elembuild1" {$stubuildingou ='ou=elementary'}
+    "$hsbuild1" {$stubuildingou ='ou=Highschool'}
+    "$msbuild1" {$stubuildingou ='ou=MiddleSchool'}
     }
 
 Write-host $Fullanme $username $password $building
