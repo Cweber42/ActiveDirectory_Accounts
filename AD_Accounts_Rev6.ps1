@@ -139,7 +139,7 @@ function RemoveSpecials ([String]$in)
 #Start transcript and download Cognos Report#
 $logfile = "$logfiledir\$(get-date -f yyy-MM-dd-HH-mm-ss).log"
 Try {Start-Transcript ($logfile)} catch {Stop-Transcript; Start-Transcript ($logfile)}
-& $cognosDL $cognosreport $cognosdir -reportstudio
+& $cognosDL -report $cognosreport -savepath $cognosdir
 
 #load AD module#
 If (Get-Module -ListAvailable | Where-Object{$_.Name -eq "ActiveDirectory"}){
@@ -339,7 +339,7 @@ $username = $fname + "." + $lname + $gradyr.substring(2)
 if ($username.length -gt 20) { $username = $username.substring(0,20) } #shorten username to 20 characters for sAMAccountName
 add-ADGroupMember `
     -Identity "$gradyr" `
-    -Member "$username" `
+    -Members "$username" `
 
 Write-Host $username added to $gradyr
 start-sleep -Milliseconds 15
@@ -357,15 +357,15 @@ $building = $student."Current Building" #Edit this to match your CSV If your hea
 if ($building -eq $hsbuild1){  #Edit this to match your building numbers for high school
 add-ADGroupMember `
     -Identity "$hsgroup" `
-    -Member "$username" `
+    -Members "$username" `
 } elseif ($building -eq $msbuild1){ #Edit this to match your building number for middle school
 add-ADGroupMember `
     -Identity "$msgroup" `
-    -Member "$username" `
+    -Members "$username" `
 } elseif ($building -eq $elembuild1){ #Edit this to match your building number for elementary
 add-ADGroupMember `
     -Identity "$elemgroup" `
-    -Member "$username" `
+    -Members "$username" `
 
 start-sleep -Milliseconds 15
 }
