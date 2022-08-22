@@ -184,10 +184,11 @@ Switch ($Student."Current Building"){
     "$msbuild1" {$stubuildingou ='ou=MiddleSchool'}
     }
 
-Get-ADUser -Filter {(EmployeeID -eq $id) -and (UserPrincipalName -ne $principalName)} `
-|Set-ADUser -GivenName $fname -Surname $lname -EmailAddress $emailadd -UserPrincipalName $principalname -SamAccountName $username -DisplayName $Fullname 
-%{
-Get-ADUser -Identity $username | Move-ADObject -TargetPath "ou=$gradyr,$stubuildingou,$stuou"
+$checkme = Get-ADUser -Filter {(EmployeeID -eq $id) -and (UserPrincipalName -ne $principalName)} `
+if($checkme){
+Write-host "$id needs to be updated"
+Set-ADUser -identity $checkme.ObjectGUID -GivenName $fname -Surname $lname -EmailAddress $emailadd -UserPrincipalName $principalname -SamAccountName $username -DisplayName $Fullname 
+Move-ADObject -identity $checkme.ObjectGUID -TargetPath "ou=$gradyr,$stubuildingou,$stuou"
 }
 }
 
@@ -201,8 +202,8 @@ Select-Object -ExpandProperty $propertyToCompare
 
 $csv1 |
 Where-Object { $_.$propertyToCompare -notin $duplicates } |
-Export-Csv -Path $csvconsolidated
-Get-Content $csvconsolidated | %{$_-replace '"','' }|Out-file -FilePath $csvnew -force
+Export-Csv -Path $csvconsolidated -notypeinformation
+Get-Content $csvconsolidated| Select-object -skip 1 | %{$_-replace '"','' }|Out-file -FilePath $csvnew -force
 
 # Configure new OU's #
 $gradou = import-csv $csvreport | select -expand "Graduation Year" |Sort| GU  #Replace with $csvfiltered if using filter
@@ -241,7 +242,7 @@ $students= Import-Csv $csvnew
  Write-Host "We have a problem with the CSV file."
  exit
 }
-
+if(($students).count -ge 1){
 #Create new AD accounts#
 write-host "Creating Student Accounts"
 foreach ($student in $students){
@@ -320,7 +321,9 @@ start-sleep -Milliseconds 15
 continue
 }
 }
-
+}else{
+Write-host "No New Students"
+}
 
 #Students OU by grad year#
 try {
