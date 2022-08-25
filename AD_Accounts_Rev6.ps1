@@ -221,7 +221,7 @@ $gradyrs = import-csv $csvreport | select -expand "Graduation Year" |Sort| GU  #
 $Curgroup = Get-ADGroup -SearchBase $newgroupspath -Filter * -Properties Name
 $ng = @()
 Foreach($g in $Curgroup){
-$ng += $g.split(' ')[0]}
+$ng += $g.name.split(' ')[0]}
 Compare-Object $gradyrs $ng |Where-Object {$_.Sideindicator -eq '<='} |Export-Csv $ngcsv -NoTypeInformation
 
 $groups = Import-Csv $ngcsv
