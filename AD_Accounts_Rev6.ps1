@@ -66,24 +66,24 @@ $stuemail = "ChangeMesd.com"
 
 #Building numbers from Eschool If you use more than the three default you will need to configure the switch commands around
 # line 201 and 280
-$elembuild1 = "8"
-#$elembuild2
+$elembuild1 = "9" #grades PK-2
+$elembuild2 = "10" #grades 3-5
 #$elembuild3
-$msbuild1 = "11"
+$msbuild1 = "11" #grades 6-8
 #$msbuild2
 #$msbuild3
-$hsbuild1 = "9"
+$hsbuild1 = "12" #grades 9-12
 #$hsbuild2
 #$hsbuild3
 
 #Student home directories. They map accord to the dirsbuilding. 
 #I am using DFS so all my directories reside under \\domain.local\share\share
-$stuhomedir1 = "\\ChangeMe.local\homes\Student-homes"
+#$stuhomedir1 = "\\ChangeMe.local\homes\Student-homes"
 #$stuhomedir2 = "\\server\share\location\" #Second building or campus
 #$stuhomedir3 = "\\server\share\location" #third building or campus
 #You can seperate multiple buildings like this @("8","9","10") This is useful if you utilize a different specific file server per building
 #Builds are LEA numbers you can find it in eschool.
-$stuhomedirs1building = @("8","9,","11")
+#$stuhomedirs1building = @("8","9,","11")
 #stuhomedirs2building = @("building#") #second building or campus #
 #stuhomedirs3building = @("building#") #third building or campus #
 
@@ -92,7 +92,8 @@ $stuhomedirs1building = @("8","9,","11")
 $password = "GenericPW1"
 
 #Generic Secufrity groups to add each student to based off the students assigned building
-$elemgroup = "elemstudents" #generic security group for elementary
+$elemgroup = "lower_elemstudents"
+$elemgroup2 = "uppader_elemstudents" #generic security group for elementary
 $msgroup = "ms-students"    #generic security group for middle school
 $hsgroup = "hs-students"    #generic security group for high school
 
@@ -123,6 +124,7 @@ $bldnotification = $false
 $hsbldcontact = "nope@nope"
 $msbldcontact = "nope@nope"
 $elembldcontact = "nope@nope"
+$elembld2contact = "nope@nope"
 #############
 # Functions #
 #############
@@ -175,6 +177,7 @@ $lname = (RemoveSpecials($student.Lastname))
 $Fullname = $fname + " " + $lname
 $gradyr = $student."Graduation Year"
 $id = $student."Student ID" 
+$grade = $student.grade
 $username = $fname + "." + $lname + $gradyr.substring(2)
 if ($username.length -gt 20) { $username = $username.substring(0,20) } #shorten username to 20 characters for sAMAccountName
 $emailadd = $fname+"."+$lname+ $gradyr.substring(2) + "@" + $stuemail
@@ -186,12 +189,15 @@ Switch ($Student."Current Building"){
     "$hsbuild1" {$stubuildingou ='ou=Highschool'}
     "$msbuild1" {$stubuildingou ='ou=MiddleSchool'}
     }
+if($grade -eq "SS"){
+    $grade = "12"
+}
 
 $checkme = Get-ADUser -Filter {(EmployeeID -eq $id) -and (UserPrincipalName -ne $principalName)} `
 if($checkme){
 Write-host "$id needs to be updated"
 Set-ADUser -identity $checkme.ObjectGUID -GivenName $fname -Surname $lname -EmailAddress $emailadd -UserPrincipalName $principalname -SamAccountName $username -DisplayName $Fullname 
-Move-ADObject -identity $checkme.ObjectGUID -TargetPath "ou=$gradyr,$stubuildingou,$stuou"
+Move-ADObject -identity $checkme.ObjectGUID -TargetPath "ou=$grade,$stubuildingou,$stuou"
 }
 }
 
@@ -257,6 +263,7 @@ $lname = (RemoveSpecials($student.Lastname))
 $Fullname = $fname + " " + $lname
 $gradyr = $student."Graduation Year"
 $id = $student."Student ID" 
+$grade = $student.grade
 $username = $fname + "." + $lname + $gradyr.substring(2)
 if ($username.length -gt 20) { $username = $username.substring(0,20) } #shorten username to 20 characters for sAMAccountName
 $emailadd = $fname+"."+$lname+ $gradyr.substring(2) + "@" + $stuemail
@@ -264,6 +271,9 @@ $principalname = $fname+"."+$lname+ $gradyr.substring(2) + "@" + $stuemail
 $homedir = $stuhomedir1 + "\" + $gradyr+ "\"+ $username
 $building = $student."Current Building" #Edit this to match your CSV If your header is not exactly Current Building
 
+if($grade -eq "SS"){
+    $grade = "12"
+}
 Switch ($Student."Current Building"){
     "$elembuild1" {$stubuildingou ='ou=elementary'}
     "$hsbuild1" {$stubuildingou ='ou=Highschool'}
@@ -279,33 +289,33 @@ New-Aduser `
 -Surname $lname `
 -UserPrincipalName $principalname `
 -DisplayName $fullname `
--name $fullname -homeDrive "h:" `
+-name $fullname `
+# -homeDrive "h:" `
 -homeDirectory $homedir `
--scriptPath "logon.bat" `
 -EmailAddress $emailadd `
 -EmployeeID	 $id `
 -ChangePasswordAtLogon $true `
 -AccountPassword (ConvertTo-SecureString "$password" -AsPlainText -force) `
 -Enabled $true `
--Path "ou=$gradyr,$stubuildingou,$stuou"`
+-Path "ou=$grade,$stubuildingou,$stuou"`
 -Department 'student'
 
-If (Test-Path $homedir -PathType Container)
-    {Write-host "$homedir already exists"}
-    Else
-    {New-Item -path $homedir -ItemType directory -Force}
+# If (Test-Path $homedir -PathType Container)
+#     {Write-host "$homedir already exists"}
+#     Else
+#     {New-Item -path $homedir -ItemType directory -Force}
 
 
-$IdentityReference=$Domainacl+$username
+# $IdentityReference=$Domainacl+$username
 
-$AccessRule=NEW-OBJECT System.Security.AccessControl.FileSystemAccessRule($IdentityReference,"FullControl",”ContainerInherit, ObjectInherit”,"None","Allow")
+# $AccessRule=NEW-OBJECT System.Security.AccessControl.FileSystemAccessRule($IdentityReference,"FullControl",”ContainerInherit, ObjectInherit”,"None","Allow")
 
-# Get current Access Rule from Home Folder for User
-$HomeFolderACL = Get-acl -Path $homedir
+# # Get current Access Rule from Home Folder for User
+# $HomeFolderACL = Get-acl -Path $homedir
 
-$HomeFolderACL.AddAccessRule($AccessRule)
+# $HomeFolderACL.AddAccessRule($AccessRule)
 
-SET-ACL –path $homedir -AclObject $HomeFolderACL
+# SET-ACL –path $homedir -AclObject $HomeFolderACL
 
 
 If (($bldnotification) -eq $true){
@@ -322,7 +332,9 @@ Send-MailMessage -SmtpServer $smtpserver -From $mailfrom -To $hsbldcontact -Subj
 Send-MailMessage -SmtpServer $smtpserver -From $mailfrom -To $msbldcontact -Subject 'New student Account' -Body $body -BodyAsHtml 
 } elseif ($building -eq $elembuild1){ #Edit this to match your building number for elementary
 Send-MailMessage -SmtpServer $smtpserver -From $mailfrom -To $elembldcontact -Subject 'New student Account' -Body $body -BodyAsHtml 
-}
+}elseif ($building -eq $elembuild2){ #Edit this to match your building number for elementary
+    Send-MailMessage -SmtpServer $smtpserver -From $mailfrom -To $elembld2contact -Subject 'New student Account' -Body $body -BodyAsHtml 
+    }
 start-sleep -Milliseconds 15
 continue
 }
@@ -377,7 +389,13 @@ add-ADGroupMember `
     -Members "$username" `
 
 start-sleep -Milliseconds 15
-}
+} elseif ($building -eq $elembuild2){ #Edit this to match your building number for elementary
+    add-ADGroupMember `
+        -Identity "$elemgroup2" `
+        -Members "$username" `
+    
+    start-sleep -Milliseconds 15
+    }
 }
 
 
@@ -393,8 +411,10 @@ if ($username.length -gt 20) { $username = $username.substring(0,20) }
 		Get-ADUser -Identity $username | Set-ADUser -Enabled:$true
 Write-host $username "enabled"
 }
+
 #Example to call GCDS after automation finish running to not put it as a second task sequence
 #start-Process -FilePath "C:\Scripts\GCDS\sync-cmd.exe" -ArgumentList '-a -o -c c:\scripts\GCDS\Student-PW-ChangeFalse' -wait -NoNewWindow; Start-Sleep -Seconds 15
+
 Stop-Transcript
 
 
