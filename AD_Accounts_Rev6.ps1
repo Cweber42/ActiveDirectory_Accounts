@@ -1,4 +1,6 @@
-﻿#                                AD Account Creation
+#Requires -Modules CognosModule,ActiveDirectory
+
+#                                AD Account Creation
 # Author: Charles Weber
 # The author offers customization and implementation services.
 # Rev6 7/21/17
@@ -45,7 +47,7 @@
 
 #Cognos Variables#
 #Location of the powershell script to run Cognos download. Can work with UNC \\server\share\ if the account has R/W access
-$cognosDL =  "C:\Scripts\CognosDownload.ps1"
+
 #Name of the report in Cognos to download
 $cognosreport = "studentinfo"
 #File location to save the Report. Can work with UNC \\server\share\ if the account has R/W access
@@ -139,7 +141,8 @@ function RemoveSpecials ([String]$in)
 #Start transcript and download Cognos Report#
 $logfile = "$logfiledir\$(get-date -f yyy-MM-dd-HH-mm-ss).log"
 Try {Start-Transcript ($logfile)} catch {Stop-Transcript; Start-Transcript ($logfile)}
-& $cognosDL -report $cognosreport -savepath $cognosdir
+Import-modle CognosModule
+Save-CognosReport -report $cognosreport -cognosfolder "_Shared Data File Reports\AD_Accounts_Rev6-Automation" -TeamContent -savepath $cognosdir
 
 #load AD module#
 If (Get-Module -ListAvailable | Where-Object{$_.Name -eq "ActiveDirectory"}){
@@ -390,7 +393,8 @@ if ($username.length -gt 20) { $username = $username.substring(0,20) }
 		Get-ADUser -Identity $username | Set-ADUser -Enabled:$true
 Write-host $username "enabled"
 }
-
+#Example to call GCDS after automation finish running to not put it as a second task sequence
+#start-Process -FilePath "C:\Scripts\GCDS\sync-cmd.exe" -ArgumentList '-a -o -c c:\scripts\GCDS\Student-PW-ChangeFalse' -wait -NoNewWindow; Start-Sleep -Seconds 15
 Stop-Transcript
 
 
