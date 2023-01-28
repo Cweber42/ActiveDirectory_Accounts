@@ -1,14 +1,11 @@
 # ActiveDirectory_Accounts
 Automation for Active Directory from Eschool/Cognos
-I can be contacted Here:
-https://goo.gl/forms/x27wHLgfIqTANefv2 [Google Form] for customization and implementation pricing.
-
 
 The primary job of the script is AD account creation and management:
 1) Create Security groups by grad year
 2) Create OU's and Nest them under building # (as a common name like MS/HS etc)
 3) Create the user accounts
-4) Place all users in generic building and gradyr groups
+4) Place all users in generic building and grade groups
 5) Disable students who have left the district on Sundays
 6) Rename students and update the information for SAM/UPN/Email/Displaynames from the cognos CSV
 7) Added the email notification to specified people in each building, each account that is created generates an individual email with the students Name, Student ID, email address and password,
@@ -29,3 +26,7 @@ The primary job of the script is AD account creation and management:
  Implemented Switch command to allow nesting of Gradyrs under building OU's, Created the Rename function, 
  new users will error out and can be ignored. Email Notification to building staff of new accounts. 
  Create home directories and set ACL for the useraccount and inherit the file share properties. 
+ #Rev6 (not changing the name anymore) 1/28/2023
+ Updated to utilize the CognosModule, show examples for multiple buildings, changed OU structure to be Grade instead of gradyr.
+!!!Home Directorys are disabled by Default now!!!!
+Example of calling GCDS from within this script. No more needing a second task sequence!
