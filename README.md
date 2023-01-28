@@ -26,7 +26,7 @@ The primary job of the script is AD account creation and management:
  Implemented Switch command to allow nesting of Gradyrs under building OU's, Created the Rename function, 
  new users will error out and can be ignored. Email Notification to building staff of new accounts. 
  Create home directories and set ACL for the useraccount and inherit the file share properties. 
- #Rev6 (not changing the name anymore) 1/28/2023
+ # Rev6 (not changing the name anymore) 1/28/2023
  Updated to utilize the CognosModule, show examples for multiple buildings, changed OU structure to be Grade instead of gradyr.
 !!!Home Directorys are disabled by Default now!!!!
 Example of calling GCDS from within this script. No more needing a second task sequence!
