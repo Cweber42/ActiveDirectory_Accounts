@@ -1,5 +1,5 @@
 #Requires -Modules CognosModule,ActiveDirectory
-
+$startTime = Get-date
 #                                AD Account Creation
 # Author: Charles Weber
 # The author offers customization and implementation services.
@@ -99,7 +99,7 @@ $hsgroup = "hs-students"    #generic security group for high school
 
 #Property to discourage duplicates from being made. Looks at the Student ID in the Cognos Report.
 $propertyToCompare = 'Student ID' #AD property to filter out students, this is set to their "EmployeeID"
-$newgroupspath = "OU=SSG,OU=Security Groups for GPO,DC=ChangeMe,DC=local" #OU for security groups for students
+$newgroupspath = "OU=SSG,OU=OU=Custom Security Groups,DC=ChangeMe,DC=local" #OU for security groups for students
 
 #Other variables#
 $disableday = "Sunday" #Day the script will check and disable students not found in the latest cognos report
@@ -129,13 +129,14 @@ $elembld2contact = "nope@nope"
 # Functions #
 #############
 
-function RemoveSpecials ([String]$in)
-{
- $in = $in -replace("\(","") #Remove ('s
- $in = $in -replace("\)","") #Remove )'s
- $in = $in -replace("\.","") #Remove Periods
- $in = $in -replace("\'","") #Remove Apostrophies
- return $in
+function RemoveSpecials ([String]$in) {
+    $in = $in -replace ("\(", "") #Remove ('s
+    $in = $in -replace ("\)", "") #Remove )'s
+    $in = $in -replace ("\.", "") #Remove Periods
+    $in = $in -replace ("\'", "") #Remove Apostrophies
+    #$in = $in -replace("\ ","") #Remove space
+    $in = $in -replace ("\-", " ") #Remove Hyphens
+    return $in
 }
 
 #Script# It is strongly encouraged you do not edit below this line
@@ -182,8 +183,6 @@ $username = $fname + "." + $lname + $gradyr.substring(2)
 if ($username.length -gt 20) { $username = $username.substring(0,20) } #shorten username to 20 characters for sAMAccountName
 $emailadd = $fname+"."+$lname+ $gradyr.substring(2) + "@" + $stuemail
 $principalname = $fname+"."+$lname+ $gradyr.substring(2) + "@" + $stuemail
-$homedir = $stuhomedir1 + "\" + $gradyr+ "\"+ $username
-$building = $student."Current Building" #Edit this to match your CSV If your header is not exactly Current Building
 Switch ($Student."Current Building"){
     "$elembuild1" {$stubuildingou ='ou=elementary'}
     "$hsbuild1" {$stubuildingou ='ou=Highschool'}
@@ -362,7 +361,7 @@ add-ADGroupMember `
     -Identity "$gradyr" `
     -Members "$username" `
 
-Write-Host $username added to $gradyr
+#Write-Host $username added to $gradyr
 start-sleep -Milliseconds 15
 }
 
@@ -409,12 +408,14 @@ $gradyr = $student."Graduation Year"
 $username = $fname + "." + $lname + $gradyr.substring(2)
 if ($username.length -gt 20) { $username = $username.substring(0,20) } 
 		Get-ADUser -Identity $username | Set-ADUser -Enabled:$true
-Write-host $username "enabled"
+#Write-host $username "enabled"
 }
 
 #Example to call GCDS after automation finish running to not put it as a second task sequence
 #start-Process -FilePath "C:\Scripts\GCDS\sync-cmd.exe" -ArgumentList '-a -o -c c:\scripts\GCDS\Student-PW-ChangeFalse' -wait -NoNewWindow; Start-Sleep -Seconds 15
 
+$endTime = Get-Date
+Write-host "Total run time $(New-TimeSpan -start $startTime -end $endTime)"
 Stop-Transcript
 
 
