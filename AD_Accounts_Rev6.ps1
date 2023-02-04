@@ -289,8 +289,6 @@ New-Aduser `
 -UserPrincipalName $principalname `
 -DisplayName $fullname `
 -name $fullname `
-# -homeDrive "h:" `
--homeDirectory $homedir `
 -EmailAddress $emailadd `
 -EmployeeID	 $id `
 -ChangePasswordAtLogon $true `
@@ -298,6 +296,8 @@ New-Aduser `
 -Enabled $true `
 -Path "ou=$grade,$stubuildingou,$stuou"`
 -Department 'student'
+# -homeDrive "h:" `
+# -homeDirectory $homedir `
 
 # If (Test-Path $homedir -PathType Container)
 #     {Write-host "$homedir already exists"}
