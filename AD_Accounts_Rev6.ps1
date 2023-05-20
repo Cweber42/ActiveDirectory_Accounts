@@ -258,7 +258,7 @@ $students= Import-Csv $csvnew
  Write-Host "We have a problem with the CSV file."
  exit
 }
-if(($students).count -ge 1){
+if($students){
 #Create new AD accounts#
 write-host "Creating Student Accounts"
 foreach ($student in $students){
