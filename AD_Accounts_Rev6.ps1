@@ -146,6 +146,8 @@ $logfile = "$logfiledir\$(get-date -f yyy-MM-dd-HH-mm-ss).log"
 Try {Start-Transcript ($logfile)} catch {Stop-Transcript; Start-Transcript ($logfile)}
 if (((Get-Date).ToShortDateString() -ge "6/1/$(Get-date -format yyyy)") -and ((Get-date).ToShortDateString() -le "7/28/$(Get-date -format yyyy)")){
     Write-Host "SCHOOOOOOLS out for SUMMER!"
+    $endTime = Get-Date
+Write-host "Total run time $(New-TimeSpan -start $startTime -end $endTime)"
 	Stop-transcript
 	Break
 }else{
