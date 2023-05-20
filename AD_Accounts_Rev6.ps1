@@ -144,6 +144,11 @@ function RemoveSpecials ([String]$in) {
 #Start transcript and download Cognos Report#
 $logfile = "$logfiledir\$(get-date -f yyy-MM-dd-HH-mm-ss).log"
 Try {Start-Transcript ($logfile)} catch {Stop-Transcript; Start-Transcript ($logfile)}
+if (((Get-Date).ToShortDateString() -ge "6/1/$(Get-date -format yyyy)") -and ((Get-date).ToShortDateString() -le "7/28/$(Get-date -format yyyy)")){
+    Write-Host "SCHOOOOOOLS out for SUMMER!"
+	Stop-transcript
+	Break
+}else{
 Import-modle CognosModule
 Save-CognosReport -report $cognosreport -cognosfolder "_Shared Data File Reports\AD_Accounts_Rev6-Automation" -TeamContent -savepath $cognosdir
 
@@ -428,3 +433,4 @@ $msg.subject = "$mailsubject - $(Get-Date)"
 $logcontents = Get-Content $logfile 
 $msg.Body = $($logcontents[5..($logcontents.length - 4)] | Out-String)
 $smtp.send($msg)
+}
